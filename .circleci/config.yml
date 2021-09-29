@@ -1,19 +1,27 @@
 jobs:
-  checkov:
+  build:
     machine: true
     steps:
       - checkout
-      - run: docker run --rm -w /src -v $(pwd):/src bridgecrew/checkov -d aws -o json | tee checkov-output.json
-      - store_artifacts:
-          path: checkov-output.json
-          destination: checkov-artifact
-          when: always
+      - run: echo "This is a build step"
 
   test:
     machine: true
     steps:
       - checkout
       - run: echo "This is a test step"
+
+  checkov:
+    machine: true
+    steps:
+      - checkout
+
+      - run: docker run --rm -w /src -v $(pwd):/src bridgecrew/checkov -d aws -o json | tee checkov-output.json
+
+      - store_artifacts:
+          path: checkov-output.json
+          destination: checkov-artifact
+          when: always              # Even if the job fails, continue to the next stages
 
   integration:
     machine: true
@@ -37,7 +45,7 @@ workflows:
       - checkov
       - test:
           requires:
-            - build 
+            - checkov
       - integration:
           requires:
             - test
