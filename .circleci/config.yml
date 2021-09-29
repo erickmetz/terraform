@@ -1,0 +1,43 @@
+jobs:
+  build:
+    machine: true
+    steps:
+      - checkout
+      - run: echo "This is a build step"
+
+  test:
+    machine: true
+    steps:
+      - checkout
+      - run: echo "This is a test step"
+
+  integration:
+    machine: true
+    steps:
+      - checkout
+      - run:
+          command: |
+            echo "This is an integration step"
+            exit 1
+
+  prod:
+    machine: true
+    steps:
+      - checkout
+      - run: echo "This is a deploy step"
+
+workflows:
+  version: 2
+  terraform:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build 
+      - integration:
+          requires:
+            - test
+      - prod:
+          type: approval
+          requires:
+            - integration
