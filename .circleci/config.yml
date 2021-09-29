@@ -1,9 +1,13 @@
 jobs:
-  build:
+  checkov:
     machine: true
     steps:
       - checkout
-      - run: echo "This is a build step"
+      - run: docker run --rm -w /src -v $(pwd):/src bridgecrew/checkov -d aws -o json | tee checkov-output.json
+      - store_artifacts:
+          path: checkov-output.json
+          destination: checkov-artifact
+          when: always
 
   test:
     machine: true
@@ -30,7 +34,7 @@ workflows:
   version: 2
   terraform:
     jobs:
-      - build
+      - checkov
       - test:
           requires:
             - build 
